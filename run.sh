@@ -31,6 +31,14 @@ do
 		read -p "Masukkan nama Interface External(ex: eth1) : " intexternal
 		sed -i "s/INTEXTERNAL=.*/INTEXTERNAL=$intexternal/" config.conf
 		read -p "Masukkan nama drive/partisi untuk cinder(ex: sdb / sdc1) : " cinderdev
+		if [[ $intmanagement == $intexternal ]]
+		then
+			read -p "Masukkan Netmask Interface Management(ex: 255.255.255.0) : " netmaskmanagement
+			sed -i "s/NETMASKMANAGEMENT=.*/NETMASKMANAGEMENT=$netmaskmanagement/" config.conf
+			read -p "Masukkan IP Gateway(ex: 192.168.137.1) : " ipgateway
+			sed -i "s/IPGATEWAY=.*/IPGATEWAY=$ipgateway/" config.conf
+		fi
+		
 		sed -i "s/CINDERDEV=.*/CINDERDEV=$cinderdev/" config.conf
 		echo -e "$blue CONTOH: Drive untuk swift: sdb sdc sdd sde $color_off"
 		read -p "Masukkan nama drive/partisi untuk swift(ex: sdc / sdd1) : " swiftdev
