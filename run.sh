@@ -25,7 +25,7 @@ do
 		read -p "Masukkan Hostname Controller(ex: controller) : " hostcontroller
 		sed -i "s/HOSTCONTROLLER=.*/HOSTCONTROLLER=$hostcontroller/" config.conf
 		read -p "Masukkan Network Management(ex: 192.168.137.0/24) : " netmanagement
-		sed -i "s/NETMANAGEMENT=.*/NETMANAGEMENT=$netmanagement/" config.conf
+		sed -i "s|NETMANAGEMENT=.*|NETMANAGEMENT=$netmanagement|" config.conf
 		read -p "Masukkan nama Interface Management(ex: eth0) : " intmanagement
 		sed -i "s/INTMANAGEMENT=.*/INTMANAGEMENT=$intmanagement/" config.conf
 		read -p "Masukkan nama Interface External(ex: eth1) : " intexternal

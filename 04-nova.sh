@@ -31,7 +31,7 @@ zypper -n install --no-recommends openstack-nova-api openstack-nova-scheduler op
 
 _EOFNEWTEST_
 
-ssh root@$IPMANAGEMENT cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
+ssh root@$IPMANAGEMENT " cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
 [DEFAULT]
 log_dir = /var/log/nova
 bindir = /usr/bin
@@ -67,8 +67,8 @@ virt_type = $TYPEVIRT
 
 [vnc]
 enabled = true
-server_listen = \$my_ip
-server_proxyclient_address = \$my_ip
+server_listen = $IPMANAGEMENT
+server_proxyclient_address = $IPMANAGEMENT
 novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
 
 [glance]
@@ -89,7 +89,7 @@ password = $PLACEMENTPASS
 
 [scheduler]
 discover_hosts_in_cells_interval = 300
-_EOF_
+_EOF_"
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 

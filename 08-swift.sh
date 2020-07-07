@@ -42,13 +42,13 @@ _EOFNEW_
 for DEVSWIFT in $SWIFTDEV
 do
 ssh root@$IPMANAGEMENT  << _EOFNEW_
-		blkid /dev/$DEVSWIFT | grep xfs > /dev/null 2>&1 && echo "/dev/$DEVSWIFT already formatted as XFS" || mkfs.xfs -f /dev/$DEVSWIFT
+	blkid /dev/$DEVSWIFT | grep xfs > /dev/null 2>&1 && echo "/dev/$DEVSWIFT already formatted as XFS" || mkfs.xfs -f /dev/$DEVSWIFT
 	
-		mkdir -p /srv/node/$DEVSWIFT
+	mkdir -p /srv/node/$DEVSWIFT
 	
-		grep /dev/$DEVSWIFT /etc/fstab > /dev/null 2>&1 && echo "/dev/$DEVSWIFT already in /etc/fstab" || echo "/dev/$DEVSWIFT /srv/node/$DEVSWIFT xfs noatime,nodiratime,nobarrier,logbufs=8 0 2" >> /etc/fstab
+	grep /dev/$DEVSWIFT /etc/fstab > /dev/null 2>&1 && echo "/dev/$DEVSWIFT already in /etc/fstab" || echo "/dev/$DEVSWIFT /srv/node/$DEVSWIFT xfs noatime,nodiratime,nobarrier,logbufs=8 0 2" >> /etc/fstab
 
-		mount /srv/node/$DEVSWIFT
+	mount /srv/node/$DEVSWIFT
 _EOFNEW_
 done
 
@@ -197,21 +197,21 @@ _EOF_
 chown -R swift:swift /srv/node
 _EOFNEW_
 
-ssh root@$IPMANAGEMENT [ -f /etc/swift/account.builder ] && echo "account.builder file already exist" || cd /etc/swift; swift-ring-builder account.builder create 10 $REPLIKASI 1 
+ssh root@$IPMANAGEMENT [ -f /etc/swift/account.builder ] && echo "account.builder file already exist" || " cd /etc/swift; swift-ring-builder account.builder create 10 $REPLIKASI 1"
 for DEVSWIFT in $SWIFTDEV
 do 
 ssh root@$IPMANAGEMENT "cd /etc/swift ; swift-ring-builder account.builder add --region 1 --zone 1 --ip $IPMANAGEMENT --port 6202 --device $DEVSWIFT --weight 100"
 done
 ssh root@$IPMANAGEMENT " cd /etc/swift ; swift-ring-builder account.builder"
 ssh root@$IPMANAGEMENT " cd /etc/swift ; swift-ring-builder account.builder rebalance"
-ssh root@$IPMANAGEMENT [ -f /etc/swift/container.builder ] && echo "container.builder file already exist" || cd /etc/swift; swift-ring-builder container.builder create 10 $REPLIKASI 1 
+ssh root@$IPMANAGEMENT [ -f /etc/swift/container.builder ] && echo "container.builder file already exist" || "cd /etc/swift; swift-ring-builder container.builder create 10 $REPLIKASI 1" 
 for DEVSWIFT in $SWIFTDEV
 do
 ssh root@$IPMANAGEMENT  "cd /etc/swift ; swift-ring-builder container.builder add --region 1 --zone 1 --ip $IPMANAGEMENT --port 6201 --device $DEVSWIFT --weight 100"
 done
 ssh root@$IPMANAGEMENT " cd /etc/swift ; swift-ring-builder container.builder"
 ssh root@$IPMANAGEMENT " cd /etc/swift ; swift-ring-builder container.builder rebalance"
-ssh root@$IPMANAGEMENT [ -f /etc/swift/object.builder ] && echo "object.builder file already exist" || cd /etc/swift ; swift-ring-builder object.builder create 10 2 1 
+ssh root@$IPMANAGEMENT [ -f /etc/swift/object.builder ] && echo "object.builder file already exist" || "cd /etc/swift ; swift-ring-builder object.builder create 10 2 1"
 for DEVSWIFT in $SWIFTDEV
 do
 ssh root@$IPMANAGEMENT "cd /etc/swift ; swift-ring-builder object.builder add --region 1 --zone 1 --ip $IPMANAGEMENT --port 6200 --device $DEVSWIFT --weight 100"
