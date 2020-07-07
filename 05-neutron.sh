@@ -104,10 +104,10 @@ _EOF_
 cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
 [DEFAULT]
 [ml2]
-type_drivers = vlan,vxlan
+type_drivers = vxlan,flat
 tenant_network_types = vxlan,flat
 mechanism_drivers = openvswitch
-extension_drivers = port_security, qos
+extension_drivers = port_security,qos
 
 [ml2_type_flat]
 flat_networks = provider
@@ -189,7 +189,7 @@ ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
 systemctl stop apparmor
 systemctl disable apparmor
 systemctl restart openstack-nova-api.service 
-su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 systemctl enable  openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 sleep 5

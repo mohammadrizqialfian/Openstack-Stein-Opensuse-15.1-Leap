@@ -5,7 +5,7 @@ color_off='\033[0m'
 #beri warna
 blue='\033[0;94m'
 
-chmod +x 00-environment.sh 01-keystone.sh 02-glance.sh 03-placement.sh 04-nova.sh 05-neutron.sh 06-horizon.sh 07-cinder.sh 08-swift.sh
+chmod +x 00-environment.sh 01-keystone.sh 02-glance.sh 03-placement.sh 04-nova.sh 05-neutron.sh 06-horizon.sh 07-cinder.sh 08-swift.sh 09-newcompute.sh
 printf '=%.0s' {1..75}; echo -e "\n"
 echo -e "\t\tMenjalankan Bash Script Openstack Stein\n"
 printf '=%.0s' {1..75}; echo -e "\n"
@@ -30,7 +30,6 @@ do
 		sed -i "s/INTMANAGEMENT=.*/INTMANAGEMENT=$intmanagement/" config.conf
 		read -p "Masukkan nama Interface External(ex: eth1) : " intexternal
 		sed -i "s/INTEXTERNAL=.*/INTEXTERNAL=$intexternal/" config.conf
-		read -p "Masukkan nama drive/partisi untuk cinder(ex: sdb / sdc1) : " cinderdev
 		if [[ $intmanagement == $intexternal ]]
 		then
 			read -p "Masukkan Netmask Interface Management(ex: 255.255.255.0) : " netmaskmanagement
@@ -38,7 +37,7 @@ do
 			read -p "Masukkan IP Gateway(ex: 192.168.137.1) : " ipgateway
 			sed -i "s/IPGATEWAY=.*/IPGATEWAY=$ipgateway/" config.conf
 		fi
-		
+		read -p "Masukkan nama drive/partisi untuk cinder(ex: sdb / sdc1) : " cinderdev
 		sed -i "s/CINDERDEV=.*/CINDERDEV=$cinderdev/" config.conf
 		echo -e "$blue CONTOH: Drive untuk swift: sdb sdc sdd sde $color_off"
 		read -p "Masukkan nama drive/partisi untuk swift(ex: sdc / sdd1) : " swiftdev
@@ -112,7 +111,7 @@ while :
 do
 	echo -e "\n"
 	printf '=%.0s' {1..40}; echo -e "\n"
-	echo -e "$blue y = menjalankan keseluruhan script $color_off"
+	echo -e "$blue y = menjalankan keseluruhan script(0-8) $color_off"
 	echo -e "$blue 0 = jalankan Script Environment $color_off"
 	echo -e "$blue 1 = jalankan Script Keystone(Identity) $color_off"
 	echo -e "$blue 2 = jalankan Script Glance(Image) $color_off"
@@ -137,7 +136,6 @@ do
 		./06-horizon.sh
 		./07-cinder.sh
 		./08-swift.sh
-		./09-newcompute.sh
 		echo -e "$blue semua script berhasil dijalankan $color_off"
 		break
 	elif [[ $input1 == 0 ]]
