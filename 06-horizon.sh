@@ -22,7 +22,7 @@ sed -i "169 a \        \'LOCATION\': \'$IPMANAGEMENT:11211\'," /srv/www/openstac
 sed -i "170 a \    \}," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "171 a \}" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "s/#OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = .*/OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
-sed -i "66 i OPENSTACK_API_VERSIONS = /{" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
+sed -i "66 i OPENSTACK_API_VERSIONS = \{" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "66 a \    \'identity\' : 3," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "67 a \    \'image\' : 2," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "68 a \    \'volume\' : 3," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py

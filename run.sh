@@ -189,6 +189,17 @@ do
 		sed -i "s/IPCOMPUTE=.*/IPCOMPUTE=$ipcompute/" config.conf
 		read -p "Masukkan Hostname Compute(ex: compute) : " hostcompute
 		sed -i "s/HOSTCOMPUTE=.*/HOSTCOMPUTE=$hostcompute/" config.conf
+		read -p "Masukkan nama Interface Management(ex: eth0) : " intmancompute
+		sed -i "s/INTMANAGEMENTCOMPUTE=.*/INTMANAGEMENTCOMPUTE=$intmancompute/" config.conf
+		read -p "Masukkan nama Interface External(ex: eth1) : " intextcompute
+		sed -i "s/INTEXTERNALCOMPUTE=.*/INTEXTERNALCOMPUTE=$intextcompute/" config.conf
+		if [[ $intmancompute == $intextcompute ]]
+		then
+			read -p "Masukkan Netmask Interface Management(ex: 255.255.255.0) : " netmaskmancompute
+			sed -i "s/NETMASKMANAGEMENTCOMPUTE=.*/NETMASKMANAGEMENTCOMPUTE=$netmaskmancompute/" config.conf
+			read -p "Masukkan IP Gateway(ex: 192.168.137.1) : " ipgatecompute
+			sed -i "s/IPGATEWAYCOMPUTE=.*/IPGATEWAYCOMPUTE=$ipgatecompute/" config.conf
+		fi
 		./09-newcompute.sh
 		echo -e "$blue script newcompute selesai dijalankan $color_off"
 		continue

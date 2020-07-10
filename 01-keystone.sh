@@ -70,7 +70,7 @@ _EOF_
 
 source keystonerc_admin
 openstack project list | grep service > /dev/null 2>&1 && echo -e "$red \n## service project already exist ##$color_off" || openstack project create --domain default --description "Service Project" service
-openstack role list | grep user > /dev/null 2>&1 && echo -e "$red\n ### User role already exist##$color_off"openstack role create user
+openstack role list | grep user > /dev/null 2>&1 && echo -e "$red\n ### User role already exist##$color_off" || openstack role create user
 
 _EOFNEWTEST_
 

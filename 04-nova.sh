@@ -42,6 +42,7 @@ transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 my_ip = $IPMANAGEMENT
 use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
+resume_guests_state_on_host_boot = true
 
 [api]
 auth_strategy = keystone

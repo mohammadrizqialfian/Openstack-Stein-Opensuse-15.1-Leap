@@ -54,6 +54,7 @@ transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 my_ip = $IPMANAGEMENT
 use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
+resume_guests_state_on_host_boot = true
 
 [api]
 auth_strategy = keystone
@@ -74,7 +75,7 @@ virt_type = $TYPEVIRT
 [vnc]
 enabled = true
 server_listen = 0.0.0.0
-server_proxyclient_address = \$my_ip
+server_proxyclient_address = $IPMANAGEMENT
 novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
 
 [glance]
@@ -96,12 +97,49 @@ password = $PLACEMENTPASS
 _EOF_
 
 _EOFNEWTEST_
-
+ssh root@$IPCOMPUTE  systemctl enable libvirtd.service openstack-nova-compute.service
+ssh root@$IPCOMPUTE  systemctl restart libvirtd.service openstack-nova-compute.service
 ssh root@$IPCOMPUTE modprobe nbd
 ssh root@$IPCOMPUTE echo nbd > /etc/modules-load.d/nbd.conf
 
+ssh root@$IPCOMPUTE << _EOFNEWTEST_
+zypper -n in --no-recommends openvswitch
+systemctl enable openvswitch
+systemctl restart openvswitch
+if [[ $INTMANAGEMENTCOMPUTE == $INTEXTERNALCOMPUTE ]]
+then
+cat << _EOF_ > /etc/sysconfig/network/ifcfg-br-ex
+BOOTPROTO='static'
+NAME='br-ex'
+STARTMODE='auto'
+OVS_BRIDGE='yes'
+OVS_BRIDGE_PORT_DEVICE='$INTMANAGEMENTCOMPUTE'
+IPADDR='$IPMANAGEMENTCOMPUTE'
+NETMASK='$NETMASKMANAGEMENTCOMPUTE'
+_EOF_
+mv /etc/sysconfig/network/ifroute-$INTMANAGEMENTCOMPUTE /etc/sysconfig/network/backup.ifroute-$INTMANAGEMENTCOMPUTE
+mv /etc/sysconfig/network/ifcfg-$INTMANAGEMENTCOMPUTE /etc/sysconfig/network/backup.ifcfg-$INTMANAGEMENTCOMPUTE  
+echo "default $IPGATEWAYCOMPUTE - br-ex" > /etc/sysconfig/network/ifroute-br-ex
+else
+mv /etc/sysconfig/network/ifcfg-$INTEXTERNALCOMPUTE /etc/sysconfig/network/backup.ifcfg-$INTEXTERNALCOMPUTE 
+cat << _EOF_ > /etc/sysconfig/network/ifcfg-br-ex
+BOOTPROTO='none'
+NAME='br-ex'
+STARTMODE='auto'
+OVS_BRIDGE='yes'
+OVS_BRIDGE_PORT_DEVICE='$INTEXTERNALCOMPUTE'
+_EOF_
+fi
+
+cat << _EOF_ > /etc/sysconfig/network/ifcfg-$INTEXTERNALCOMPUTE
+STARTMODE='auto'
+BOOTPROTO='none'
+_EOF_
+systemctl restart network
+_EOFNEWTEST_
+
 ssh root@$IPCOMPUTE << _EOFNEW_
-zypper -n install --no-recommends openstack-neutron-linuxbridge-agent bridge-utils
+zypper -n install --no-recommends openvswitch
 
 [ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
 [ ! -f /etc/neutron/neutron.conf.d/010-neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf.d/010-neutron.conf /etc/neutron/neutron.conf.d/010-neutron.conf.orig
@@ -132,22 +170,30 @@ password = $NEUTRONPASS
 _EOF_
 
 
-[ ! -f /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig
+[ ! -f /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig
 
-cat << _EOF_ > /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
 [DEFAULT]
 
+[agent]
+tunnel_types = vxlan
+vxlan_udp_port = 4789
+l2_population = False
+drop_flows_on_start = False
+
+[network_log]
+
+[ovs]
+integration_bridge = br-int
+tunnel_bridge = br-tun
+local_ip = $IPMANAGEMENTCOMPUTE
+bridge_mappings = provider:br-ex
+
 [securitygroup]
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 enable_security_group = true
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
-[linux_bridge]
-physical_interface_mappings = provider:$INTEXTERNAL
-
-[vxlan]
-enable_vxlan = true
-local_ip = $IPCOMPUTE
-l2_population = true
+[xenapi]
 _EOF_
 
 modprobe br_netfilter
@@ -176,9 +222,9 @@ ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
 systemctl stop apparmor
 systemctl disable apparmor
 systemctl restart openstack-nova-compute.service
-su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-systemctl enable  openstack-neutron-linuxbridge-agent.service 
-systemctl restart openstack-neutron-linuxbridge-agent.service 
+# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+systemctl enable  openstack-neutron-openvswitch-agent.service 
+systemctl restart openstack-neutron-openvswitch-agent.service 
 sleep 5
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --permanent --add-port=5900-5999/tcp

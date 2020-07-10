@@ -170,6 +170,7 @@ _EOFNEW_
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 cat << _EOF_ >> /etc/nova/nova.conf.d/010-nova.conf
+
 [neutron]
 url = http://$IPMANAGEMENT:9696
 auth_url = http://$IPMANAGEMENT:5000
