@@ -13,6 +13,8 @@ echo -e "$red \n###Configre NTP### $color_off"
 zypper -n install --no-recommends chrony
 [ -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf.orig /etc/chrony.conf
 [ ! -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf /etc/chrony.conf.orig
+sed -i "s/^pool/#pool/" /etc/chrony.d/pool.conf
+sed -i "s/^pool/#pool/" /etc/chrony.conf
 echo "server 0.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf
 echo "server 1.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf
 echo "server 2.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf

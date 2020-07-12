@@ -6,7 +6,7 @@ echo -e "$red \n\n############## Starting running script Add New Compute Opensta
 ssh-copy-id -i ~/.ssh/id_rsa.pub root@$IPCOMPUTE
 
 echo -e "$red \n###Configre Hostname### $color_off"
-ssh root@$IPMANAGEMENT echo -e "$IPCOMPUTE\t $HOSTCOMPUTE" >> /etc/hosts
+ssh root@$IPMANAGEMENT "echo -e '$IPCOMPUTE\t $HOSTCOMPUTE' >> /etc/hosts"
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
 echo -e "$IPMANAGEMENT\t $HOSTCONTROLLER" >> /etc/hosts
@@ -16,6 +16,8 @@ echo -e "$red \n###Configre NTP### $color_off"
 zypper -n install --no-recommends chrony
 [ -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf.orig /etc/chrony.conf
 [ ! -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf /etc/chrony.conf.orig
+sed -i "s/^pool/#pool/" /etc/chrony.d/pool.conf
+sed -i "s/^pool/#pool/" /etc/chrony.conf
 echo "server $IPMANAGEMENT iburst" >> /etc/chrony.conf
 systemctl enable chronyd.service
 systemctl restart chronyd.service
@@ -43,7 +45,7 @@ zypper -n install --no-recommends genisoimage openstack-nova-compute  qemu-kvm l
 
 _EOFNEWTEST_
 
-ssh root@$IPCOMPUTE cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
+ssh root@$IPCOMPUTE "cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
 [DEFAULT]
 log_dir = /var/log/nova
 bindir = /usr/bin
@@ -94,13 +96,12 @@ auth_url = http://$IPMANAGEMENT:5000/v3
 username = placement
 password = $PLACEMENTPASS
 
-_EOF_
+_EOF_"
 
-_EOFNEWTEST_
 ssh root@$IPCOMPUTE  systemctl enable libvirtd.service openstack-nova-compute.service
 ssh root@$IPCOMPUTE  systemctl restart libvirtd.service openstack-nova-compute.service
-ssh root@$IPCOMPUTE modprobe nbd
-ssh root@$IPCOMPUTE echo nbd > /etc/modules-load.d/nbd.conf
+ssh root@$IPCOMPUTE "modprobe nbd"
+ssh root@$IPCOMPUTE "echo nbd > /etc/modules-load.d/nbd.conf"
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
 zypper -n in --no-recommends openvswitch
@@ -139,7 +140,7 @@ systemctl restart network
 _EOFNEWTEST_
 
 ssh root@$IPCOMPUTE << _EOFNEW_
-zypper -n install --no-recommends openvswitch
+zypper -n install --no-recommends openstack-neutron-openvswitch-agent
 
 [ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
 [ ! -f /etc/neutron/neutron.conf.d/010-neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf.d/010-neutron.conf /etc/neutron/neutron.conf.d/010-neutron.conf.orig
