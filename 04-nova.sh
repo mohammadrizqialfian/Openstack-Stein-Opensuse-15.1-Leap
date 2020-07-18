@@ -65,6 +65,7 @@ password = $NOVAPASS
 
 [libvirt]
 virt_type = $TYPEVIRT
+cpu_mode=host-passthrough
 
 [vnc]
 enabled = true
@@ -110,10 +111,9 @@ su -s /bin/sh -c "nova-manage cell_v2 discover_hosts --verbose" nova
 nova-manage cell_v2 simple_cell_setup
 
 firewall-cmd --permanent --add-port=5900-5999/tcp
-firewall-cmd --permanent --add-port 6080/tcp
-firewall-cmd --permanent --add-port 6081/tcp
-firewall-cmd --permanent --add-port 6082/tcp
-firewall-cmd --permanent --add-port 8773-8775/tcp
+firewall-cmd --permanent --add-port 6080-6082/tcp
+firewall-cmd --permanent --add-port 8774-8775/tcp
+firewall-cmd --permanent --add-port 8778/tcp
 firewall-cmd --reload
 
 source keystonerc_admin

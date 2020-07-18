@@ -248,8 +248,9 @@ chown -R root:swift /etc/swift
 systemctl enable openstack-swift-proxy.service memcached.service openstack-swift-account.service openstack-swift-account-auditor.service openstack-swift-account-reaper.service openstack-swift-account-replicator.service openstack-swift-container.service openstack-swift-container-auditor.service openstack-swift-container-replicator.service openstack-swift-container-updater.service openstack-swift-object.service openstack-swift-object-auditor.service openstack-swift-object-replicator.service openstack-swift-object-updater.service
 systemctl restart openstack-swift-proxy.service memcached.service openstack-swift-account.service openstack-swift-account-auditor.service openstack-swift-account-reaper.service openstack-swift-account-replicator.service openstack-swift-container.service openstack-swift-container-auditor.service openstack-swift-container-replicator.service openstack-swift-container-updater.service openstack-swift-object.service openstack-swift-object-auditor.service openstack-swift-object-replicator.service openstack-swift-object-updater.service
 sleep 5
+firewall-cmd --permanent --add-port 873/tcp
 firewall-cmd --permanent --add-port 8080/tcp
-firewall-cmd --permanent --add-port 6000-6002/tcp
+firewall-cmd --permanent --add-port 6200-6202/tcp
 firewall-cmd --reload
 firewall-cmd --list-all
 source keystonerc_admin

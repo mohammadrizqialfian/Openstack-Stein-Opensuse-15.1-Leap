@@ -69,7 +69,6 @@ systemctl restart openstack-nova-api.service
 systemctl enable openstack-cinder-api.service openstack-cinder-scheduler.service openstack-cinder-volume.service tgtd.service
 systemctl restart openstack-cinder-api.service openstack-cinder-scheduler.service openstack-cinder-volume.service tgtd.service
 sleep 10
-firewall-cmd --permanent --add-port 873/tcp
 firewall-cmd --permanent --add-port 3260/tcp
 firewall-cmd --permanent --add-port 8776/tcp
 firewall-cmd --reload

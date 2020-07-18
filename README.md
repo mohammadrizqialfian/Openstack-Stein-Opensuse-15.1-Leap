@@ -6,7 +6,6 @@ You can install easily simply by running the run.sh file or manually running one
 #### Run this to check your service not error
 source keystonerc_admin
 openstack token issue
-openstack token revoke
 openstack extension list --network
 openstack network agent list
 openstack image list

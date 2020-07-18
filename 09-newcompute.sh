@@ -115,7 +115,7 @@ NAME='br-ex'
 STARTMODE='auto'
 OVS_BRIDGE='yes'
 OVS_BRIDGE_PORT_DEVICE='$INTMANAGEMENTCOMPUTE'
-IPADDR='$IPMANAGEMENTCOMPUTE'
+IPADDR='$IPCOMPUTE'
 NETMASK='$NETMASKMANAGEMENTCOMPUTE'
 _EOF_
 mv /etc/sysconfig/network/ifroute-$INTMANAGEMENTCOMPUTE /etc/sysconfig/network/backup.ifroute-$INTMANAGEMENTCOMPUTE
@@ -187,7 +187,7 @@ drop_flows_on_start = False
 [ovs]
 integration_bridge = br-int
 tunnel_bridge = br-tun
-local_ip = $IPMANAGEMENTCOMPUTE
+local_ip = $IPCOMPUTE
 bridge_mappings = provider:br-ex
 
 [securitygroup]
