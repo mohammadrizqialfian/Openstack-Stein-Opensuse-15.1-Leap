@@ -5,14 +5,13 @@ color_off='\033[0m'
 #beri warna
 blue='\033[0;94m'
 
-chmod +x 00-environment.sh 01-keystone.sh 02-glance.sh 03-placement.sh 04-nova.sh 05-neutron.sh 06-horizon.sh 07-cinder.sh 08-swift.sh 09-newcompute.sh
 printf '=%.0s' {1..75}; echo -e "\n"
 echo -e "\t\tMenjalankan Bash Script Openstack Stein\n"
 printf '=%.0s' {1..75}; echo -e "\n"
 while :
 do
 	echo -e "$blue y = mengganti variable di config.conf secara interactive $color_off"
-	echo -e "$blue n / lain = lewati, pastikan anda sudah mengganti variable tersebut di config.conf $color_off"
+	echo -e "$blue n / lain = lewati, pastikan anda sudah mengganti variable tersebut secara manual di config.conf $color_off"
 	read -p "Apakah anda ingin merubah isi variable di config.conf(y/n): " jawab1
 	if [[ $jawab1 == "y" ]]
 	then
@@ -127,6 +126,7 @@ do
 	read -p "Apakah anda yakin ingin menjalankan script ini(y/n): " input1
 	if [[ $input1 == "y" ]]
 	then 
+		chmod +x 00-environment.sh 01-keystone.sh 02-glance.sh 03-placement.sh 04-nova.sh 05-neutron.sh 06-horizon.sh 07-cinder.sh 08-swift.sh 
 		./00-environment.sh
 		./01-keystone.sh
 		./02-glance.sh
@@ -140,51 +140,61 @@ do
 		break
 	elif [[ $input1 == 0 ]]
 	then
+		chmod +x 00-environment.sh
 		./00-environment.sh
 		echo -e "$blue script environment selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 1 ]]
 	then
+		chmod +x 01-keystone.sh
 		./01-keystone.sh
 		echo -e "$blue script keystone selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 2 ]]
 	then
+		chmod +x 02-glance.sh
 		./02-glance.sh
 		echo -e "$blue script glance selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 3 ]]
 	then
+		chmod +x 03-placement.sh
 		./03-placement.sh
 		echo -e "$blue script placement selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 4 ]]
 	then
+		chmod +x 04-nova.sh
 		./04-nova.sh
 		echo -e "$blue script nova selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 5 ]]
 	then
+		chmod +x 05-neutron.sh
 		./05-neutron.sh
 		echo -e "$blue scipt neutron selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 6 ]]
 	then
+		chmod +x 06-horizon.sh
 		./06-horizon.sh
 		echo -e "$blue script horizon selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 7 ]]
 	then
+		chmod +x 07-cinder.sh
 		./07-cinder.sh
 		echo -e "$blue script cinder selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 8 ]]
 	then
+		chmod +x 08-swift.sh
 		./08-swift.sh
 		echo -e "$blue script swift selesai dijalankan $color_off"
 		continue
 	elif [[ $input1 == 9 ]]
 	then
+		chmod +x 09-newcompute.sh
 		read -p "Masukkan IP Management Compute(ex: 192.168.137.10) : " ipcompute
 		sed -i "s/IPCOMPUTE=.*/IPCOMPUTE=$ipcompute/" config.conf
 		read -p "Masukkan Hostname Compute(ex: compute) : " hostcompute

@@ -65,7 +65,8 @@ password = $NOVAPASS
 
 [libvirt]
 virt_type = $TYPEVIRT
-cpu_mode=host-passthrough
+##uncomment jika ingin mengaktifkan nested virtualization
+#cpu_mode=host-passthrough
 
 [vnc]
 enabled = true

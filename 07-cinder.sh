@@ -74,6 +74,10 @@ firewall-cmd --permanent --add-port 8776/tcp
 firewall-cmd --reload
 systemctl restart openstack-nova-api.service openstack-cinder-api.service openstack-cinder-scheduler.service openstack-cinder-volume.service tgtd.service
 sleep 5
+systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+sleep 5
+systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
+sleep 5
 source keystonerc_admin
 openstack volume service list
 _EOFNEW_

@@ -66,5 +66,5 @@ openstack server create --image cirros --flavor m1.tiny --key-name demo --networ
 openstack server create --image cirros --flavor m1.tiny --key-name demo --network private-net --wait demo-priv-instance
 openstack floating ip create public-net
 ### MAnual
-openstack server add floating ip #ip_dari_command_sebelumnya 
-ssh -i demo.pem cloud-user@#ip_dari_command_sebelumnya
+#openstack server add floating ip #ip_dari_command_sebelumnya 
+#ssh -i demo.pem cloud-user@#ip_dari_command_sebelumnya

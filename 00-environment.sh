@@ -7,7 +7,9 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub root@$IPMANAGEMENT
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 echo -e "$red \n###Configre Hostname### $color_off"
-echo -e "$IPMANAGEMENT\t $HOSTNAME" >> /etc/hosts
+[ -f /etc/hosts.orig ] && cp /etc/hosts.orig /etc/hosts
+[ ! -f /etc/hosts.orig ] && cp /etc/hosts /etc/hosts.orig
+echo -e "$IPMANAGEMENT\t $HOSTCONTROLLER" >> /etc/hosts
 echo -e "$red \n###Configre NTP### $color_off"
 #### Configure NTP ####
 zypper -n install --no-recommends chrony
@@ -15,6 +17,7 @@ zypper -n install --no-recommends chrony
 [ ! -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf /etc/chrony.conf.orig
 sed -i "s/^pool/#pool/" /etc/chrony.d/pool.conf
 sed -i "s/^pool/#pool/" /etc/chrony.conf
+sed -i "s/^! pool/#pool/" /etc/chrony.conf
 echo "server 0.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf
 echo "server 1.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf
 echo "server 2.opensuse.pool.ntp.org iburst" >> /etc/chrony.conf
