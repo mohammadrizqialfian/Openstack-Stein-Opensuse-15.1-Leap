@@ -72,6 +72,8 @@ sleep 10
 firewall-cmd --permanent --add-port 3260/tcp
 firewall-cmd --permanent --add-port 8776/tcp
 firewall-cmd --reload
+systemctl restart openstack-nova-api.service openstack-cinder-api.service openstack-cinder-scheduler.service openstack-cinder-volume.service tgtd.service
+sleep 5
 source keystonerc_admin
 openstack volume service list
 _EOFNEW_

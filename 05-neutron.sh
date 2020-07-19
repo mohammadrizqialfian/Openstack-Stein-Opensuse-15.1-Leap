@@ -23,6 +23,7 @@ mv /etc/sysconfig/network/ifroute-$INTMANAGEMENT /etc/sysconfig/network/backup.i
 mv /etc/sysconfig/network/ifcfg-$INTMANAGEMENT /etc/sysconfig/network/backup.ifcfg-$INTMANAGEMENT  
 echo "default $IPGATEWAY - br-ex" > /etc/sysconfig/network/ifroute-br-ex
 else
+
 mv /etc/sysconfig/network/ifcfg-$INTEXTERNAL /etc/sysconfig/network/backup.ifcfg-$INTEXTERNAL 
 cat << _EOF_ > /etc/sysconfig/network/ifcfg-br-ex
 BOOTPROTO='none'
@@ -73,7 +74,7 @@ notify_nova_on_port_data_changes = true
 root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 
 [oslo_concurrency]
-lock_path = /var/run/neutron
+lock_path = /var/lib/neutron/tmp
 
 [keystone_authtoken]
 www_authenticate_uri = http://$IPMANAGEMENT:5000
@@ -104,9 +105,9 @@ _EOF_
 cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
 [DEFAULT]
 [ml2]
-type_drivers = flat,vlan,vxlan
-tenant_network_types = vxlan
-mechanism_drivers = openvswitch,l2population
+type_drivers = vxlan,flat
+tenant_network_types = vxlan,flat
+mechanism_drivers = openvswitch
 extension_drivers = port_security
 
 [ml2_type_flat]
@@ -130,7 +131,7 @@ cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
 [agent]
 tunnel_types = vxlan
 vxlan_udp_port = 4789
-l2_population = true
+l2_population = False
 drop_flows_on_start = False
 
 [network_log]
@@ -164,7 +165,7 @@ sed -i "s/#enable_isolated_metadata = false/enable_isolated_metadata = true/" /e
 
 [ ! -f /etc/neutron/metadata_agent.ini.orig ] && cp -v /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.orig
 sed -i "s/#nova_metadata_host = .*/nova_metadata_host = $IPMANAGEMENT/" /etc/neutron/metadata_agent.ini
-sed -i "s/#metadata_proxy_shared_secret =/metadata_proxy_shared_secret = $METADATAPASS/" /etc/neutron/metadata_agent.ini
+sed -i "s/#metadata_proxy_shared_secret =.*/metadata_proxy_shared_secret = $METADATAPASS/" /etc/neutron/metadata_agent.ini
 
 _EOFNEW_
 
@@ -193,6 +194,10 @@ systemctl restart openstack-nova-api.service
 su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 systemctl enable  openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+sleep 5
+systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+sleep 5
+systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
 sleep 5
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --reload
