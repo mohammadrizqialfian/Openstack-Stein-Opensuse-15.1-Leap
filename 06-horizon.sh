@@ -10,11 +10,11 @@ cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/conf.d/opens
 a2enmod rewrite
 [ -f /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig ] && cp -v /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 [ ! -f /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig ] && cp -v /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig
-sed -i "s/OPENSTACK_HOST = .*/OPENSTACK_HOST = \"$HOSTNAME\"/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
+sed -i "s/OPENSTACK_HOST = .*/OPENSTACK_HOST = \"$HOSTCONTROLLER\"/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "s/OPENSTACK_KEYSTONE_DEFAULT_ROLE = .*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = \"user\"/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "s/#ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "s/#OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = 'Default'/OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = \"Default\"/" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
-sed -i "166 i SESSION_ENGINE = \'django.contrib.sessions.backends.cache\'" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
+sed -i "166 i SESSION_ENGINE = \'django.contrib.sessions.backends.cache\' " /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "166 a CACHES = \{" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "167 a \    \'default\': \{" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "168 a \        \'BACKEND\': \'django.core.cache.backends.memcached.MemcachedCache\'," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py

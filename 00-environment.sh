@@ -7,8 +7,8 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub root@$IPMANAGEMENT
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 echo -e "$red \n###Configre Hostname### $color_off"
-[ -f /etc/hosts.orig ] && cp /etc/hosts.orig /etc/hosts
-[ ! -f /etc/hosts.orig ] && cp /etc/hosts /etc/hosts.orig
+[ -f /etc/hosts.orig ] && cp -v /etc/hosts.orig /etc/hosts
+[ ! -f /etc/hosts.orig ] && cp -v /etc/hosts /etc/hosts.orig
 echo -e "$IPMANAGEMENT\t $HOSTCONTROLLER" >> /etc/hosts
 echo -e "$red \n###Configre NTP### $color_off"
 #### Configure NTP ####
@@ -91,11 +91,11 @@ tar xzvf /tmp/etcd-v3.2.7-linux-amd64.tar.gz -C /tmp/etcd --strip-components=1
 cp /tmp/etcd/etcd /usr/bin/etcd
 cp /tmp/etcd/etcdctl /usr/bin/etcdctl
 cat << _EOF_ > /etc/etcd/etcd.conf.yml
-name: $HOSTNAME
+name: $HOSTCONTROLLER
 data-dir: /var/lib/etcd
 initial-cluster-state: 'new'
 initial-cluster-token: 'etcd-cluster-01'
-initial-cluster: $HOSTNAME=http://$IPMANAGEMENT:2380
+initial-cluster: $HOSTCONTROLLER=http://$IPMANAGEMENT:2380
 initial-advertise-peer-urls: http://$IPMANAGEMENT:2380
 advertise-client-urls: http://$IPMANAGEMENT:2379
 listen-peer-urls: http://0.0.0.0:2380

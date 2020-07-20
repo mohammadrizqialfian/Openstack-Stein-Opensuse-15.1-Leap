@@ -21,9 +21,14 @@ ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 
 zypper -n install --no-recommends openstack-glance openstack-glance-api 
 
-cat << _EOF_ > /etc/glance/glance-api.conf.d/010-glance-api.conf
+cat << _EOF_ > /etc/glance/glance-api.conf.d/500-glance-api.conf
 [database]
 connection = mysql+pymysql://glance:$GLANCEDBPASS@$IPMANAGEMENT/glance
+
+[glance_store]
+stores = file,http
+default_store = file
+filesystem_store_datadir = /var/lib/glance/images
 
 [keystone_authtoken]
 www_authenticate_uri = http://$IPMANAGEMENT:5000
@@ -39,10 +44,6 @@ password = $GLANCEPASS
 [paste_deploy]
 flavor = keystone
 
-[glance_store]
-stores = file,http
-default_store = file
-filesystem_store_datadir = /var/lib/glance/images
 _EOF_
 
 systemctl enable openstack-glance-api.service 

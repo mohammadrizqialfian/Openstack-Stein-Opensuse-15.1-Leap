@@ -21,21 +21,8 @@ _EOFNEWTEST_
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 
 zypper -n install --no-recommends openstack-placement-api
-[ ! -f /etc/placement/placement.conf.d/010-placement.conf.orig ] && cp -v /etc/placement/placement.conf.d/010-placement.conf /etc/placement/placement.conf.d/010-placement.conf.orig
 
-cat << _EOF_ > /etc/placement/placement.conf.d/010-placement.conf
-[DEFAULT]
-log_dir = /var/log/placement
-bindir = /usr/bin
-state_path = /var/lib/placement
-
-[oslo_concurrency]
-lock_path = /run/placement
-
-
-[placement_database]
-connection = mysql+pymysql://placement:$PLACEMENTDBPASS@$IPMANAGEMENT/placement
-
+cat << _EOF_ > /etc/placement/placement.conf.d/500-placement.conf
 [api]
 auth_strategy = keystone
 
@@ -48,10 +35,13 @@ user_domain_name = Default
 project_name = service
 username = placement
 password = $PLACEMENTPASS
+
+[placement_database]
+connection = mysql+pymysql://placement:$PLACEMENTDBPASS@$IPMANAGEMENT/placement
 _EOF_
 
 su -s /bin/sh -c "placement-manage db sync" placement
-mv /etc/apache2/vhosts.d/openstack-placement-api.conf.sample /etc/apache2/vhosts.d/openstack-placement-api.conf
+cp -v /etc/apache2/vhosts.d/openstack-placement-api.conf.sample /etc/apache2/vhosts.d/openstack-placement-api.conf
 sed -i "s/8780/8778/" /etc/apache2/vhosts.d/openstack-placement-api.conf
 systemctl reload apache2.service
 source keystonerc_admin

@@ -11,11 +11,7 @@ mysql -u root -p$DBPASSWORD -e "SHOW DATABASES;" | grep keystone > /dev/null 2>&
 echo -e "$red \n\tInstall & Configure Keystone.. $color_off"
 zypper -n install --no-recommends python2-pyasn1
 zypper -n install --no-recommends openstack-keystone apache2 apache2-mod_wsgi
-[ ! -f /etc/keystone/keystone.conf.orig ] && cp -v /etc/keystone/keystone.conf /etc/keystone/keystone.conf.orig
-cat << _EOF_ > /etc/keystone/keystone.conf.d/010-keystone.conf
-[DEFAULT]
-log_dir=/var/log/keystone
-
+cat << _EOF_ > /etc/keystone/keystone.conf.d/500-keystone.conf
 [database]
 connection = mysql+pymysql://keystone:$KEYSTONEDBPASS@$IPMANAGEMENT/keystone
 
@@ -28,7 +24,7 @@ keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
 keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
 keystone-manage bootstrap --bootstrap-password $ADMINLOG --bootstrap-admin-url http://$IPMANAGEMENT:5000/v3/ --bootstrap-internal-url http://$IPMANAGEMENT:5000/v3/ --bootstrap-public-url http://$IPMANAGEMENT:5000/v3/ --bootstrap-region-id RegionOne
 [ ! -f /etc/sysconfig/apache2.orig ] && cp -v /etc/sysconfig/apache2 /etc/sysconfig/apache2.orig
-sed -i "s/APACHE_SERVERNAME=.*/APACHE_SERVERNAME=\"$HOSTNAME\"/" /etc/sysconfig/apache2
+sed -i "s/APACHE_SERVERNAME=.*/APACHE_SERVERNAME=\"$HOSTCONTROLLER\"/" /etc/sysconfig/apache2
 
 cat << _EOF_ > /etc/apache2/conf.d/wsgi-keystone.conf
 Listen 5000
@@ -48,6 +44,8 @@ Listen 5000
     </Directory>
 </VirtualHost>
 _EOF_
+[ -f /etc/apache2/loadmodule.conf.orig ] && cp -v /etc/apache2/loadmodule.conf.orig /etc/apache2/loadmodule.conf
+[ ! -f /etc/apache2/loadmodule.conf.orig ] && cp -v /etc/apache2/loadmodule.conf /etc/apache2/loadmodule.conf.orig
 echo "LoadModule wsgi_module /usr/lib64/apache2/mod_wsgi.so" >> /etc/apache2/loadmodule.conf
 chown -R keystone:keystone /etc/keystone
 systemctl enable apache2.service

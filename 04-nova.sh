@@ -26,23 +26,17 @@ ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 zypper --gpg-auto-import-keys refresh && zypper -n dist-upgrade
 zypper -n install --no-recommends genisoimage
 zypper -n install --no-recommends openstack-nova-api openstack-nova-scheduler openstack-nova-conductor openstack-nova-consoleauth openstack-nova-novncproxy iptables openstack-nova-compute qemu-kvm libvirt 
-
-[ ! -f /etc/nova/nova.conf.d/010-nova.conf.orig ] && cp -v /etc/nova/nova.conf.d/010-nova.conf /etc/nova/nova.conf.d/010-nova.conf.orig
-
 _EOFNEWTEST_
 
-ssh root@$IPMANAGEMENT " cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
+ssh root@$IPMANAGEMENT " cat << _EOF_ > /etc/nova/nova.conf.d/500-nova.conf
 [DEFAULT]
-log_dir = /var/log/nova
-bindir = /usr/bin
-state_path = /var/lib/nova
-enabled_apis = osapi_compute,metadata
 compute_driver = libvirt.LibvirtDriver
-transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
-my_ip = $IPMANAGEMENT
-use_neutron = True
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
 resume_guests_state_on_host_boot = true
+my_ip = $IPMANAGEMENT
+use_neutron = true
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+enabled_apis = osapi_compute,metadata
+transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 
 [api]
 auth_strategy = keystone
@@ -52,6 +46,9 @@ connection = mysql+pymysql://nova:$NOVADBPASS@$IPMANAGEMENT/nova_api
 
 [database]
 connection = mysql+pymysql://nova:$NOVADBPASS@$IPMANAGEMENT/nova
+
+[glance]
+api_servers = http://$IPMANAGEMENT:9292
 
 [keystone_authtoken]
 auth_url = http://$IPMANAGEMENT:5000/
@@ -68,15 +65,6 @@ virt_type = $TYPEVIRT
 ##uncomment jika ingin mengaktifkan nested virtualization
 #cpu_mode=host-passthrough
 
-[vnc]
-enabled = true
-server_listen = $IPMANAGEMENT
-server_proxyclient_address = $IPMANAGEMENT
-novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
-
-[glance]
-api_servers = http://$IPMANAGEMENT:9292
-
 [oslo_concurrency]
 lock_path = /var/run/nova
 
@@ -92,6 +80,12 @@ password = $PLACEMENTPASS
 
 [scheduler]
 discover_hosts_in_cells_interval = 300
+
+[vnc]
+enabled = true
+server_listen = $IPMANAGEMENT
+server_proxyclient_address = $IPMANAGEMENT
+novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
 _EOF_"
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
