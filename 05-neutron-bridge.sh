@@ -5,43 +5,6 @@ source config.conf
 echo -e "$red \n\n############## Starting running script Openstack Neutron ############## $color_off\n\n"
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
-zypper -n in --no-recommends openvswitch
-systemctl enable openvswitch
-systemctl restart openvswitch
-if [[ $INTMANAGEMENT == $INTEXTERNAL ]]
-then
-cat << _EOF_ > /etc/sysconfig/network/ifcfg-br-ex
-BOOTPROTO='static'
-NAME='br-ex'
-STARTMODE='auto'
-OVS_BRIDGE='yes'
-OVS_BRIDGE_PORT_DEVICE='$INTMANAGEMENT'
-IPADDR='$IPMANAGEMENT'
-NETMASK='$NETMASKMANAGEMENT'
-_EOF_
-mv /etc/sysconfig/network/ifroute-$INTMANAGEMENT /etc/sysconfig/network/backup.ifroute-$INTMANAGEMENT
-mv /etc/sysconfig/network/ifcfg-$INTMANAGEMENT /etc/sysconfig/network/backup.ifcfg-$INTMANAGEMENT  
-echo "default $IPGATEWAY - br-ex" > /etc/sysconfig/network/ifroute-br-ex
-else
-
-mv /etc/sysconfig/network/ifcfg-$INTEXTERNAL /etc/sysconfig/network/backup.ifcfg-$INTEXTERNAL 
-cat << _EOF_ > /etc/sysconfig/network/ifcfg-br-ex
-BOOTPROTO='none'
-NAME='br-ex'
-STARTMODE='auto'
-OVS_BRIDGE='yes'
-OVS_BRIDGE_PORT_DEVICE='$INTEXTERNAL'
-_EOF_
-fi
-
-cat << _EOF_ > /etc/sysconfig/network/ifcfg-$INTEXTERNAL
-STARTMODE='auto'
-BOOTPROTO='none'
-_EOF_
-systemctl restart network
-_EOFNEWTEST_
-
-ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 source keystonerc_admin
 mysql -u root -p$DBPASSWORD -e "SHOW DATABASES;" | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## neutron database already exists ## $color_off" || mysql -u root -p$DBPASSWORD -e "CREATE DATABASE neutron; GRANT ALL PRIVILEGES ON neutron.* TO 'nutron'@'localhost' IDENTIFIED BY '$NEUTRONDBPASS'; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY '$NEUTRONDBPASS';"
 openstack user list | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## neutron user already exists ## $color_off" || openstack user create --domain default --password $NEUTRONPASS neutron
@@ -50,13 +13,13 @@ openstack service list | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## ne
 openstack endpoint list | grep public | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## neutron public endpoint already exists ## $color_off" || openstack endpoint create --region RegionOne network public http://$IPMANAGEMENT:9696
 openstack endpoint list | grep internal | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## neutron internal endpoint already exists ## $color_off" || openstack endpoint create --region RegionOne network internal http://$IPMANAGEMENT:9696
 openstack endpoint list | grep admin | grep neutron > /dev/null 2>&1 && echo -e "$red \n ## neutron admin endpoint already exists ## $color_off" || openstack endpoint create --region RegionOne network admin http://$IPMANAGEMENT:9696
-
 _EOFNEWTEST_
 
 ssh root@$IPMANAGEMENT << _EOFNEW_
-zypper -n install --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-openvswitch-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent 
-
-cat << _EOF_ > /etc/neutron/neutron.conf.d/500-neutron.conf
+zypper -n install --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-linuxbridge-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent bridge-utils
+[ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
+[ ! -f /etc/neutron/neutron.conf.d/010-neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf.d/010-neutron.conf /etc/neutron/neutron.conf.d/010-neutron.conf.orig
+cat << _EOF_ > /etc/neutron/neutron.conf.d/010-neutron.conf
 [DEFAULT]
 auth_strategy = keystone
 core_plugin = ml2
@@ -91,7 +54,8 @@ username = nova
 password = $NOVAPASS
 
 [oslo_concurrency]
-lock_path = /var/lib/neutron/tmp
+lock_path = /var/run/neutron
+
 _EOF_
 
 [ ! -f /etc/neutron/plugins/ml2/ml2_conf.ini.orig ] && cp -v /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugins/ml2/ml2_conf.ini.orig
@@ -99,72 +63,61 @@ cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
 [DEFAULT]
 
 [ml2]
-type_drivers = vxlan,flat
-tenant_network_types = vxlan,flat
-mechanism_drivers = openvswitch,l2_population
-extension_drivers = port_security,qos
-path_mtu = 0
+type_drivers = flat,vlan,vxlan
+tenant_network_types = vxlan
+mechanism_drivers = linuxbridge,l2population
+extension_drivers = port_security
 
 [ml2_type_flat]
 flat_networks = provider
 
 [ml2_type_vxlan]
 vni_ranges = 1:1000
-vxlan_group = 224.0.0.1
 
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-enable_security_group = true
 enable_ipset = True
-
 _EOF_
 
-[ ! -f /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig
-
-cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
+[ ! -f /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/linuxbridge_agent.ini /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig
+cat << _EOF_ > /etc/neutron/plugins/ml2/linuxbridge_agent.ini
 [DEFAULT]
 
-[agent]
-tunnel_types = vxlan
-vxlan_udp_port = 4789
-l2_population = True
-drop_flows_on_start = False
-
-[ovs]
-integration_bridge = br-int
-tunnel_bridge = br-tun
-local_ip = $IPMANAGEMENT
-bridge_mappings = provider:br-ex
-
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+enable_security_group = true
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+[linux_bridge]
+physical_interface_mappings = provider:$INTEXTERNAL
+
+[vxlan]
+enable_vxlan = true
+local_ip = $IPMANAGEMENT
+l2_population = true
 
 _EOF_
 
-# modprobe br_netfilter
-# echo 'br_netfilter' > /etc/modules-load.d/netfilter.conf
-# lsmod | grep netfilter
-# sysctl -a | grep bridge
+modprobe br_netfilter
+echo 'br_netfilter' > /etc/modules-load.d/netfilter.conf
+lsmod | grep netfilter
+sysctl -a | grep bridge
 
 [ ! -f /etc/neutron/l3_agent.ini.orig ] && cp -v /etc/neutron/l3_agent.ini /etc/neutron/l3_agent.ini.orig
-sed -i "s/#interface_driver = .*/interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver/" /etc/neutron/l3_agent.ini
+sed -i "s/#interface_driver = .*/interface_driver = linuxbridge/" /etc/neutron/l3_agent.ini
 
 [ ! -f /etc/neutron/dhcp_agent.ini.orig ] && cp -v /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.orig
-sed -i "s/#interface_driver = .*/interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver/" /etc/neutron/dhcp_agent.ini
+sed -i "s/#interface_driver = .*/interface_driver = linuxbridge/" /etc/neutron/dhcp_agent.ini
 sed -i "s/#dhcp_driver = .*/dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq/" /etc/neutron/dhcp_agent.ini
 sed -i "s/#enable_isolated_metadata = false/enable_isolated_metadata = true/" /etc/neutron/dhcp_agent.ini
 
 [ ! -f /etc/neutron/metadata_agent.ini.orig ] && cp -v /etc/neutron/metadata_agent.ini /etc/neutron/metadata_agent.ini.orig
 sed -i "s/#nova_metadata_host = .*/nova_metadata_host = $IPMANAGEMENT/" /etc/neutron/metadata_agent.ini
-sed -i "s/#metadata_proxy_shared_secret =.*/metadata_proxy_shared_secret = $METADATAPASS/" /etc/neutron/metadata_agent.ini
-
+sed -i "s/#metadata_proxy_shared_secret =/metadata_proxy_shared_secret = $METADATAPASS/" /etc/neutron/metadata_agent.ini
 _EOFNEW_
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 [ -f /etc/nova/nova.conf.d/500-nova.conf.orig ] && cp -v /etc/nova/nova.conf.d/500-nova.conf.orig /etc/nova/nova.conf.d/500-nova.conf
 [ ! -f /etc/nova/nova.conf.d/500-nova.conf.orig ] && cp -v /etc/nova/nova.conf.d/500-nova.conf /etc/nova/nova.conf.d/500-nova.conf.orig
 cat << _EOF_ >> /etc/nova/nova.conf.d/500-nova.conf
-
 [neutron]
 url = http://$IPMANAGEMENT:9696
 auth_url = http://$IPMANAGEMENT:5000
@@ -178,27 +131,18 @@ password = $NEUTRONPASS
 service_metadata_proxy = true
 metadata_proxy_shared_secret = $METADATAPASS
 _EOF_
-
 echo 'NEUTRON_PLUGIN_CONF="/etc/neutron/plugins/ml2/ml2_conf.ini"' >> /etc/sysconfig/neutron
 ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
-# systemctl status apparmor
 systemctl restart openstack-nova-api.service 
-# Jika database neutron tidak berhasil dibuat jalankan perintah ini.
-# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-systemctl enable  openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
-systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
-sleep 5
-systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
-sleep 5
-systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
+# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/500-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+systemctl enable  openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+systemctl start openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 sleep 5
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --reload
-
 source keystonerc_admin
 openstack extension list --network
 openstack network agent list
-
 _EOFNEWTEST_
 
 
