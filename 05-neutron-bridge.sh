@@ -17,9 +17,7 @@ _EOFNEWTEST_
 
 ssh root@$IPMANAGEMENT << _EOFNEW_
 zypper -n install --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-linuxbridge-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent bridge-utils
-[ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
-[ ! -f /etc/neutron/neutron.conf.d/010-neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf.d/010-neutron.conf /etc/neutron/neutron.conf.d/010-neutron.conf.orig
-cat << _EOF_ > /etc/neutron/neutron.conf.d/010-neutron.conf
+cat << _EOF_ > /etc/neutron/neutron.conf.d/500-neutron.conf
 [DEFAULT]
 auth_strategy = keystone
 core_plugin = ml2
@@ -136,7 +134,7 @@ ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
 systemctl restart openstack-nova-api.service 
 # su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/500-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 systemctl enable  openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
-systemctl start openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+systemctl restart openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 sleep 5
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --reload
