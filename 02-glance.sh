@@ -45,7 +45,7 @@ password = $GLANCEPASS
 flavor = keystone
 
 _EOF_
-
+chown root:glance /etc/glance/glance-api.conf.d/500-glance-api.conf
 systemctl enable openstack-glance-api.service 
 systemctl restart openstack-glance-api.service 
 sleep 5

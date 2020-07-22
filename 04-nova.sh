@@ -89,7 +89,7 @@ novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
 _EOF_"
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
-
+chown root:nova /etc/nova/nova.conf.d/500-nova.conf
 modprobe nbd
 echo nbd > /etc/modules-load.d/nbd.conf
 

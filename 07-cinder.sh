@@ -24,10 +24,8 @@ zypper -n install --no-recommends openstack-cinder-api openstack-cinder-schedule
 pvcreate /dev/$CINDERDEV
 vgcreate cinder-volumes /dev/$CINDERDEV
 
-[ ! -f /etc/cinder/cinder.conf.orig ] && cp -v /etc/cinder/cinder.conf /etc/cinder/cinder.conf.orig
-cat << _EOF_ > /etc/cinder/cinder.conf.d/010-cinder.conf
+cat << _EOF_ > /etc/cinder/cinder.conf.d/500-cinder.conf
 [DEFAULT]
-log_dir = /var/log/cinder
 transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 auth_strategy = keystone
 enabled_backends = lvm
@@ -63,7 +61,7 @@ cat << _EOF_ >> /etc/nova/nova.conf.d/010-nova.conf
 [cinder]
 os_region_name = RegionOne
 _EOF_
-
+chown root:cinder /etc/cinder/cinder.conf.d/500-cinder.conf
 echo "include /var/lib/cinder/volumes/*" > /etc/tgt/conf.d/cinder.conf
 systemctl restart openstack-nova-api.service
 systemctl enable openstack-cinder-api.service openstack-cinder-scheduler.service openstack-cinder-volume.service tgtd.service

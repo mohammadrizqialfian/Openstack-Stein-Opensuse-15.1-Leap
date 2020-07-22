@@ -16,6 +16,7 @@ _EOFNEW_
 
 ssh root@$IPMANAGEMENT << _EOFNEW_
 zypper -n install --no-recommends openstack-swift-proxy python2-swiftclient python2-swiftclient python2-keystoneclient python2-xml memcached openstack-swift-account openstack-swift-container openstack-swift-object xfsprogs rsync
+[ -f /etc/swift/proxy-server.conf.orig ] && cp -v /etc/swift/proxy-server.conf.orig /etc/swift/proxy-server.conf
 [ ! -f /etc/swift/proxy-server.conf.orig ] && cp -v /etc/swift/proxy-server.conf /etc/swift/proxy-server.conf.orig
 sed -i "s|# swift_dir = /etc/swift|swift_dir = /etc/swift|" /etc/swift/proxy-server.conf
 sed -i "s/^pipeline = .*/pipeline = catch_errors gatekeeper healthcheck proxy-logging cache container_sync bulk ratelimit authtoken keystoneauth container-quotas account-quotas slo dlo versioned_writes proxy-logging proxy-server/" /etc/swift/proxy-server.conf

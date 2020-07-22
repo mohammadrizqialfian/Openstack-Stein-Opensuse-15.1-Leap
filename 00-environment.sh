@@ -46,6 +46,7 @@ max_connections = 4096
 collation-server = utf8_general_ci
 character-set-server = utf8
 _EOF_
+chown root:mysql /etc/my.cnf.d/openstack.cnf
     systemctl enable mysql.service
     systemctl restart mysql.service
     mysqladmin --user=root password "$DBPASSWORD"
@@ -101,7 +102,8 @@ advertise-client-urls: http://$IPMANAGEMENT:2379
 listen-peer-urls: http://0.0.0.0:2380
 listen-client-urls: http://$IPMANAGEMENT:2379
 _EOF_
-
+chown root:etcd /etc/etcd/etcd.conf.yml
+fi
 cat << _EOF_ > /usr/lib/systemd/system/etcd.service
 [Unit]
 After=network.target
@@ -121,7 +123,6 @@ _EOF_
 systemctl daemon-reload
 systemctl enable etcd
 systemctl restart etcd
-fi
 systemctl stop apparmor
 systemctl disable apparmor
 sleep 3

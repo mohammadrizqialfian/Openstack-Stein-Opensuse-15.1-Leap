@@ -54,8 +54,7 @@ openstack endpoint list | grep admin | grep neutron > /dev/null 2>&1 && echo -e 
 _EOFNEWTEST_
 
 ssh root@$IPMANAGEMENT << _EOFNEW_
-zypper -n install --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-openvswitch-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent 
-
+zypper -n install --no-recommends  openstack-neutron openstack-neutron-server openstack-neutron-dhcp-agent openstack-neutron-metadata-agent openstack-neutron-l3-agent   openstack-neutron-openvswitch-agent
 cat << _EOF_ > /etc/neutron/neutron.conf.d/500-neutron.conf
 [DEFAULT]
 auth_strategy = keystone
@@ -93,6 +92,7 @@ password = $NOVAPASS
 [oslo_concurrency]
 lock_path = /var/lib/neutron/tmp
 _EOF_
+chown root:neutron /etc/neutron/neutron.conf.d/500-neutron.conf
 
 [ ! -f /etc/neutron/plugins/ml2/ml2_conf.ini.orig ] && cp -v /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugins/ml2/ml2_conf.ini.orig
 cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
@@ -101,7 +101,7 @@ cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
 [ml2]
 type_drivers = vxlan,flat
 tenant_network_types = vxlan,flat
-mechanism_drivers = openvswitch,l2_population
+mechanism_drivers = openvswitch,l2population
 extension_drivers = port_security,qos
 path_mtu = 0
 
@@ -120,6 +120,7 @@ enable_ipset = True
 _EOF_
 
 [ ! -f /etc/neutron/plugins/ml2/linuxbridge_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig
+
 
 cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
 [DEFAULT]
@@ -177,7 +178,9 @@ username = neutron
 password = $NEUTRONPASS
 service_metadata_proxy = true
 metadata_proxy_shared_secret = $METADATAPASS
+
 _EOF_
+chown root:nova  /etc/nova/nova.conf.d/500-nova.conf
 
 echo 'NEUTRON_PLUGIN_CONF="/etc/neutron/plugins/ml2/ml2_conf.ini"' >> /etc/sysconfig/neutron
 ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/

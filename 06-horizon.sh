@@ -28,6 +28,7 @@ sed -i "67 a \    \'image\' : 2," /srv/www/openstack-dashboard/openstack_dashboa
 sed -i "68 a \    \'volume\' : 3," /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i "69 a \}" /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 sed -i 's|TIME_ZONE = .*|TIME_ZONE = "Asia/Jakarta"|' /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
+chown wwwrun:www /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py
 systemctl restart apache2.service memcached.service
 sleep 5
 firewall-cmd --permanent --add-port=80/tcp

@@ -18,7 +18,7 @@ connection = mysql+pymysql://keystone:$KEYSTONEDBPASS@$IPMANAGEMENT/keystone
 [token]
 provider = fernet
 _EOF_
-
+chown root:keystone /etc/keystone/keystone.conf.d/500-keystone.conf
 su -s /bin/sh -c "keystone-manage db_sync" keystone
 keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
 keystone-manage credential_setup --keystone-user keystone --keystone-group keystone

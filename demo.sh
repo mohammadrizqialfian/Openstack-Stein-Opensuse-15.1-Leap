@@ -68,3 +68,20 @@ openstack floating ip create public-net
 ### MAnual
 #openstack server add floating ip #ip_dari_command_sebelumnya 
 #ssh -i demo.pem cloud-user@#ip_dari_command_sebelumnya
+# systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+
+# systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
+# tail -f /var/log/nova/* -f /var/log/neutron/* | grep "ERROR\|WARNING"
+# source keystonerc_admin
+# openstack token issue
+# openstack token revoke
+#openstack extension list --network
+#openstack network agent list
+#openstack image list
+#openstack network list
+#openstack subnet list
+#openstack keypair list
+#openstack server list
+#openstack volume service list
+#swift stat 
+#openstack container list
