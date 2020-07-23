@@ -137,12 +137,24 @@ do
 		./07-cinder.sh
 		./08-swift.sh
 		echo -e "$blue semua script berhasil dijalankan $color_off"
+		echo -e "$blue Anda diwajibkan untuk merestart server controller anda agar service berjalan normal $color_off"
+		read -p "Apakah anda ingin merestart server anda sekarang (y/n): " input2
+		if [[ $input2 == "y" ]]
+		then
+			ssh root@$IPMANAGEMENT reboot
+		fi
 		break
 	elif [[ $input1 == 0 ]]
 	then
 		chmod +x 00-environment.sh
 		./00-environment.sh
 		echo -e "$blue script environment selesai dijalankan $color_off"
+		echo -e "$blue Anda diwajibkan untuk merestart server controller setelah menjalankan script environment namun anda juga bisa merestartnya nanti setelah menjalankan script lainnya $color_off"
+		read -p "Apakah anda ingin merestart server anda sekarang (y/n): " input4
+		if [[ $input4 == "y" ]]
+		then
+			ssh root@$IPMANAGEMENT reboot
+		fi
 		continue
 	elif [[ $input1 == 1 ]]
 	then
@@ -212,10 +224,13 @@ do
 		fi
 		./09-newcompute.sh
 		echo -e "$blue script newcompute selesai dijalankan $color_off"
+		echo -e "$blue Anda diwajibkan untuk merestart server compute anda agar service berjalan normal $color_off"
+		read -p "Apakah anda ingin merestart server anda sekarang (y/n): " input3
+		if [[ $input3 == "y" ]]
+		then
+			ssh root@$IPCOMPUTE reboot
+		fi
 		continue
 	fi
-	
-	
-	
 	break
 done

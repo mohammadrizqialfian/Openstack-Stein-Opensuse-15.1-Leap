@@ -9,6 +9,9 @@ echo -e "$red \n###Configre Hostname### $color_off"
 ssh root@$IPMANAGEMENT "echo -e '$IPCOMPUTE\t $HOSTCOMPUTE' >> /etc/hosts"
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
+echo -e "$red \n###Configre Hostname### $color_off"
+[ -f /etc/hosts.orig ] && cp -v /etc/hosts.orig /etc/hosts
+[ ! -f /etc/hosts.orig ] && cp -v /etc/hosts /etc/hosts.orig
 echo -e "$IPMANAGEMENT\t $HOSTCONTROLLER" >> /etc/hosts
 echo -e "$IPCOMPUTE\t $HOSTCOMPUTE" >> /etc/hosts
 echo -e "$red \n###Configre NTP### $color_off"
@@ -18,6 +21,7 @@ zypper -n install --no-recommends chrony
 [ ! -f /etc/chrony.conf.orig ] && cp -v /etc/chrony.conf /etc/chrony.conf.orig
 sed -i "s/^pool/#pool/" /etc/chrony.d/pool.conf
 sed -i "s/^pool/#pool/" /etc/chrony.conf
+sed -i "s/^! pool/#pool/" /etc/chrony.conf
 echo "server $IPMANAGEMENT iburst" >> /etc/chrony.conf
 systemctl enable chronyd.service
 systemctl restart chronyd.service
@@ -45,7 +49,7 @@ zypper -n install --no-recommends genisoimage openstack-nova-compute  qemu-kvm l
 
 _EOFNEWTEST_
 
-ssh root@$IPCOMPUTE "cat << _EOF_ > /etc/nova/nova.conf.d/010-nova.conf
+ssh root@$IPCOMPUTE "cat << _EOF_ > /etc/nova/nova.conf.d/500-nova.conf
 [DEFAULT]
 log_dir = /var/log/nova
 bindir = /usr/bin
@@ -97,7 +101,7 @@ username = placement
 password = $PLACEMENTPASS
 
 _EOF_"
-
+ssh root@$IPCOMPUTE "chown root:nova /etc/nova/nova.conf.d/500-nova.conf"
 ssh root@$IPCOMPUTE  systemctl enable libvirtd.service openstack-nova-compute.service
 ssh root@$IPCOMPUTE  systemctl restart libvirtd.service openstack-nova-compute.service
 ssh root@$IPCOMPUTE "modprobe nbd"
@@ -142,17 +146,10 @@ _EOFNEWTEST_
 ssh root@$IPCOMPUTE << _EOFNEW_
 zypper -n install --no-recommends openstack-neutron-openvswitch-agent
 
-[ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
-[ ! -f /etc/neutron/neutron.conf.d/010-neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf.d/010-neutron.conf /etc/neutron/neutron.conf.d/010-neutron.conf.orig
-cat << _EOF_ > /etc/neutron/neutron.conf.d/010-neutron.conf
+cat << _EOF_ > /etc/neutron/neutron.conf.d/500-neutron.conf
 [DEFAULT]
-state_path = /var/lib/neutron
-log_dir = /var/log/neutron
 transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 auth_strategy = keystone
-
-[agent]
-root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 
 [oslo_concurrency]
 lock_path = /var/run/neutron
@@ -170,7 +167,7 @@ password = $NEUTRONPASS
 
 _EOF_
 
-
+chown root:neutron /etc/neutron/neutron.conf.d/500-neutron.conf
 [ ! -f /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig ] && cp -v /etc/neutron/plugins/ml2/openvswitch_agent.ini /etc/neutron/plugins/ml2/openvswitch_agent.ini.orig
 
 cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
@@ -197,15 +194,12 @@ enable_security_group = true
 [xenapi]
 _EOF_
 
-modprobe br_netfilter
-echo 'br_netfilter' > /etc/modules-load.d/netfilter.conf
-lsmod | grep netfilter
-sysctl -a | grep bridge
-
 _EOFNEW_
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
-cat << _EOF_ >> /etc/nova/nova.conf.d/010-nova.conf
+/etc/nova/nova.conf.d/500-nova.conf.orig /etc/nova/nova.conf.d/500-nova.conf
+[ ! -f /etc/nova/nova.conf.d/500-nova.conf.orig ] && cp -v /etc/nova/nova.conf.d/500-nova.conf /etc/nova/nova.conf.d/500-nova.conf.orig
+cat << _EOF_ >> /etc/nova/nova.conf.d/500-nova.conf
 [neutron]
 url = http://$IPMANAGEMENT:9696
 auth_url = http://$IPMANAGEMENT:5000
@@ -223,7 +217,7 @@ ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
 systemctl stop apparmor
 systemctl disable apparmor
 systemctl restart openstack-nova-compute.service
-# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf.d/010-neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+# su -s /bin/sh -c "neutron-db-manage upgrade head" neutron
 systemctl enable  openstack-neutron-openvswitch-agent.service 
 systemctl restart openstack-neutron-openvswitch-agent.service 
 sleep 5

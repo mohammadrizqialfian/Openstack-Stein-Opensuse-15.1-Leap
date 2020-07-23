@@ -108,7 +108,6 @@ nova-manage cell_v2 simple_cell_setup
 firewall-cmd --permanent --add-port=5900-5999/tcp
 firewall-cmd --permanent --add-port 6080-6082/tcp
 firewall-cmd --permanent --add-port 8774-8775/tcp
-firewall-cmd --permanent --add-port 8778/tcp
 firewall-cmd --reload
 
 source keystonerc_admin

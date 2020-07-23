@@ -43,6 +43,8 @@ chown root:placement /etc/placement/placement.conf.d/500-placement.conf
 su -s /bin/sh -c "placement-manage db sync" placement
 cp -v /etc/apache2/vhosts.d/openstack-placement-api.conf.sample /etc/apache2/vhosts.d/openstack-placement-api.conf
 sed -i "s/8780/8778/" /etc/apache2/vhosts.d/openstack-placement-api.conf
+firewall-cmd --permanent --add-port 8778/tcp
+firewall-cmd --reload
 systemctl reload apache2.service
 source keystonerc_admin
 placement-status upgrade check

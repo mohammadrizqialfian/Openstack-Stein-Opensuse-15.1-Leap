@@ -37,7 +37,7 @@ openstack project create --domain default --description "Demo Project" $NAMA_PRO
 openstack user create --domain default --password $PASS_USER $NAMA_USER
 openstack role add --project $NAMA_PROJECT --user $NAMA_USER user
 openstack network create public-net --external --share --provider-network-type flat --provider-physical-network provider
-openstack subnet create --subnet-range $SUBNET_PUB --no-dhcp --gateway $GATEWAY_PUB --allocation-pool start=$START_PUB,end=$END_PUB --network public-net public-sub
+openstack subnet create --subnet-range $SUBNET_PUB --dhcp --gateway $GATEWAY_PUB --allocation-pool start=$START_PUB,end=$END_PUB --network public-net public-sub
 
 cat << _EOF_ > keystonerc_$NAMA_USER
 unset OS_SERVICE_TOKEN
@@ -66,22 +66,5 @@ openstack server create --image cirros --flavor m1.tiny --key-name demo --networ
 openstack server create --image cirros --flavor m1.tiny --key-name demo --network private-net --wait demo-priv-instance
 openstack floating ip create public-net
 ### MAnual
-#openstack server add floating ip #ip_dari_command_sebelumnya 
-#ssh -i demo.pem cloud-user@#ip_dari_command_sebelumnya
-# systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
-
-# systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
-# tail -f /var/log/nova/* -f /var/log/neutron/* | grep "ERROR\|WARNING"
-# source keystonerc_admin
-# openstack token issue
-# openstack token revoke
-#openstack extension list --network
-#openstack network agent list
-#openstack image list
-#openstack network list
-#openstack subnet list
-#openstack keypair list
-#openstack server list
-#openstack volume service list
-#swift stat 
-#openstack container list
+#openstack server add floating ip demo-priv-instance #ip_dari_command_sebelumnya 
+#ssh -i demo.pem cirros@#ip_dari_command_sebelumnya
