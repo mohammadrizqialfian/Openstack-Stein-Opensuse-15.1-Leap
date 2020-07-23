@@ -51,13 +51,10 @@ _EOFNEWTEST_
 
 ssh root@$IPCOMPUTE "cat << _EOF_ > /etc/nova/nova.conf.d/500-nova.conf
 [DEFAULT]
-log_dir = /var/log/nova
-bindir = /usr/bin
-state_path = /var/lib/nova
 enabled_apis = osapi_compute,metadata
 compute_driver = libvirt.LibvirtDriver
 transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
-my_ip = $IPMANAGEMENT
+my_ip = $IPCOMPUTE
 use_neutron = True
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 resume_guests_state_on_host_boot = true
@@ -81,7 +78,7 @@ virt_type = $TYPEVIRT
 [vnc]
 enabled = true
 server_listen = 0.0.0.0
-server_proxyclient_address = $IPMANAGEMENT
+server_proxyclient_address = $IPCOMPUTE
 novncproxy_base_url = http://$IPMANAGEMENT:6080/vnc_auto.html
 
 [glance]

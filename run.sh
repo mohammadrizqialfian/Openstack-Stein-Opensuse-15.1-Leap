@@ -108,6 +108,7 @@ done
 
 while :
 do
+	source config.conf
 	echo -e "\n"
 	printf '=%.0s' {1..40}; echo -e "\n"
 	echo -e "$blue y = menjalankan keseluruhan script(0-8) $color_off"
@@ -230,7 +231,6 @@ do
 		then
 			ssh root@$IPCOMPUTE reboot
 		fi
-		continue
 	fi
 	break
 done
