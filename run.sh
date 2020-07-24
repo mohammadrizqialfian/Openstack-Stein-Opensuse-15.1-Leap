@@ -45,6 +45,21 @@ do
 		sed -i "s/REPLIKASI=.*/REPLIKASI=$replikasi/" config.conf
 		read -p "Masukkan tipe virtualisasi untuk compute(ex: kvm / qemu) : " typevirt
 		sed -i "s/TYPEVIRT=.*/TYPEVIRT=$typevirt/" config.conf
+		if [[ $typevirt == "kvm" ]]
+		then
+			read -p "Aktifkan Nested Virtualization(y/n) : " nested
+			if [[ $nested == "y" ]]
+			then
+				sed -i "s/#cpu_mode/cpu_mode/" 04-nova.sh
+				read -p "apa jenis processor anda (intel/amd) : " proc
+				if [[ $proc == "intel" ]]
+					sed -i "s/#intel/ /" 04-nova.sh
+				else
+					sed -i "s/#amd/ /" 04-nova.sh
+				fi
+			fi
+		fi
+		echo -e "\n"
 		echo -e "\n"
 		echo -e "$blue y = generate password random untuk service openstack $color_off"
 		echo -e "$blue n / lain = atur 1 password yang sama untuk semua service openstack $color_off"
@@ -222,6 +237,20 @@ do
 			sed -i "s/NETMASKMANAGEMENTCOMPUTE=.*/NETMASKMANAGEMENTCOMPUTE=$netmaskmancompute/" config.conf
 			read -p "Masukkan IP Gateway(ex: 192.168.137.1) : " ipgatecompute
 			sed -i "s/IPGATEWAYCOMPUTE=.*/IPGATEWAYCOMPUTE=$ipgatecompute/" config.conf
+		fi
+		if [[ $TYPEVIRT == "kvm" ]]
+		then
+			read -p "Aktifkan Nested Virtualization(y/n) : " nested
+			if [[ $nested == "y" ]]
+			then
+				sed -i "s/#cpu_mode/cpu_mode/" 09-newcompute.sh
+				read -p "apa jenis processor anda (intel/amd) : " proc
+				if [[ $proc == "intel" ]]
+					sed -i "s/#intel/ /" 09-newcompute.sh
+				else
+					sed -i "s/#amd/ /" 09-newcompute.sh
+				fi
+			fi
 		fi
 		./09-newcompute.sh
 		echo -e "$blue script newcompute selesai dijalankan $color_off"

@@ -110,7 +110,7 @@ flat_networks = provider
 
 [ml2_type_vxlan]
 vni_ranges = 1:1000
-vxlan_group = 224.0.0.1
+# vxlan_group = 224.0.0.1
 
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver

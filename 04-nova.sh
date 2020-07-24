@@ -62,7 +62,7 @@ password = $NOVAPASS
 
 [libvirt]
 virt_type = $TYPEVIRT
-##uncomment jika ingin mengaktifkan nested virtualization
+##uncomment line dibawah ini jika ingin mengaktifkan nested virtualization
 #cpu_mode=host-passthrough
 
 [oslo_concurrency]
@@ -90,8 +90,14 @@ _EOF_"
 
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 chown root:nova /etc/nova/nova.conf.d/500-nova.conf
+## hapus "#nama_proc" untuk mengaktifkan nested virtualization
+#intel modprobe kvm_intel nested=1
+#intel echo "options kvm_intel nested=1" > /etc/modprobe.d/kvm.conf
+#amd modprobe kvm_amd nested=1
+#amd echo "options kvm_amd nested=1" > /etc/modprobe.d/kvm.conf
 modprobe nbd
 echo nbd > /etc/modules-load.d/nbd.conf
+
 
 su -s /bin/sh -c "nova-manage api_db sync" nova
 su -s /bin/sh -c "nova-manage cell_v2 map_cell0" nova

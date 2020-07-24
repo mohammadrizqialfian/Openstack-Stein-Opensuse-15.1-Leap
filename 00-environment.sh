@@ -126,6 +126,7 @@ systemctl restart etcd
 systemctl stop apparmor
 systemctl disable apparmor
 sleep 3
+firewall-cmd --permanent --add-service=ntp 
 firewall-cmd --permanent --add-port=3306/tcp
 firewall-cmd --permanent --add-port=5672/tcp
 firewall-cmd --permanent --add-port=11211/tcp

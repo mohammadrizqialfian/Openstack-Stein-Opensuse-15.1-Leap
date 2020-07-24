@@ -74,6 +74,8 @@ password = $NOVAPASS
 
 [libvirt]
 virt_type = $TYPEVIRT
+##uncomment line dibawah ini jika ingin mengaktifkan nested virtualization
+#cpu_mode=host-passthrough
 
 [vnc]
 enabled = true
@@ -98,11 +100,18 @@ username = placement
 password = $PLACEMENTPASS
 
 _EOF_"
-ssh root@$IPCOMPUTE "chown root:nova /etc/nova/nova.conf.d/500-nova.conf"
-ssh root@$IPCOMPUTE  systemctl enable libvirtd.service openstack-nova-compute.service
-ssh root@$IPCOMPUTE  systemctl restart libvirtd.service openstack-nova-compute.service
-ssh root@$IPCOMPUTE "modprobe nbd"
-ssh root@$IPCOMPUTE "echo nbd > /etc/modules-load.d/nbd.conf"
+ssh root@$IPCOMPUTE << _EOFNEWTEST_
+## hapus "#nama_proc" untuk mengaktifkan nested virtualization
+#intel modprobe kvm_intel nested=1
+#intel echo "options kvm_intel nested=1" > /etc/modprobe.d/kvm.conf
+#amd modprobe kvm_amd nested=1
+#amd echo "options kvm_amd nested=1" > /etc/modprobe.d/kvm.conf
+chown root:nova /etc/nova/nova.conf.d/500-nova.conf
+systemctl enable libvirtd.service openstack-nova-compute.service
+systemctl restart libvirtd.service openstack-nova-compute.service
+modprobe nbd
+echo nbd > /etc/modules-load.d/nbd.conf
+_EOFNEWTEST_
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
 zypper -n in --no-recommends openvswitch
