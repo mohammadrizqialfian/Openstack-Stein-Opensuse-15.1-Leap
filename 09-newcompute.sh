@@ -149,7 +149,7 @@ transport_url = rabbit://openstack:$RABBITPASS@$IPMANAGEMENT
 auth_strategy = keystone
 
 [oslo_concurrency]
-lock_path = /var/run/neutron
+lock_path = /var/lib/neutron/tmp
 
 [keystone_authtoken]
 www_authenticate_uri = http://$IPMANAGEMENT:5000
@@ -186,7 +186,6 @@ bridge_mappings = provider:br-ex
 
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-enable_security_group = true
 
 [xenapi]
 _EOF_
@@ -194,7 +193,7 @@ _EOF_
 _EOFNEW_
 
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
-/etc/nova/nova.conf.d/500-nova.conf.orig /etc/nova/nova.conf.d/500-nova.conf
+[ -f /etc/nova/nova.conf.d/500-nova.conf.orig ] && cp -v  /etc/nova/nova.conf.d/500-nova.conf.orig /etc/nova/nova.conf.d/500-nova.conf
 [ ! -f /etc/nova/nova.conf.d/500-nova.conf.orig ] && cp -v /etc/nova/nova.conf.d/500-nova.conf /etc/nova/nova.conf.d/500-nova.conf.orig
 cat << _EOF_ >> /etc/nova/nova.conf.d/500-nova.conf
 [neutron]

@@ -101,7 +101,7 @@ cat << _EOF_ > /etc/neutron/plugins/ml2/ml2_conf.ini
 [ml2]
 type_drivers = vxlan,flat
 tenant_network_types = vxlan,flat
-mechanism_drivers = openvswitch,l2population
+mechanism_drivers = openvswitch
 extension_drivers = port_security,qos
 path_mtu = 0
 
@@ -114,7 +114,7 @@ vxlan_group = 224.0.0.1
 
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-enable_security_group = true
+enable_security_group = True
 enable_ipset = True
 
 _EOF_
@@ -128,7 +128,7 @@ cat << _EOF_ > /etc/neutron/plugins/ml2/openvswitch_agent.ini
 [agent]
 tunnel_types = vxlan
 vxlan_udp_port = 4789
-l2_population = True
+l2_population = False
 drop_flows_on_start = False
 
 [ovs]
