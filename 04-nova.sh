@@ -63,7 +63,7 @@ password = $NOVAPASS
 [libvirt]
 virt_type = $TYPEVIRT
 ##uncomment line dibawah ini jika ingin mengaktifkan nested virtualization
-#cpu_mode=host-passthrough
+#cpu_mode = host-passthrough
 
 [oslo_concurrency]
 lock_path = /var/run/nova

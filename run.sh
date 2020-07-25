@@ -53,6 +53,7 @@ do
 				sed -i "s/#cpu_mode/cpu_mode/" 04-nova.sh
 				read -p "apa jenis processor anda (intel/amd) : " proc
 				if [[ $proc == "intel" ]]
+				then
 					sed -i "s/#intel/ /" 04-nova.sh
 				else
 					sed -i "s/#amd/ /" 04-nova.sh
@@ -246,6 +247,7 @@ do
 				sed -i "s/#cpu_mode/cpu_mode/" 09-newcompute.sh
 				read -p "apa jenis processor anda (intel/amd) : " proc
 				if [[ $proc == "intel" ]]
+				then
 					sed -i "s/#intel/ /" 09-newcompute.sh
 				else
 					sed -i "s/#amd/ /" 09-newcompute.sh
