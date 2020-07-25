@@ -191,6 +191,7 @@ systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.
 sleep 5
 systemctl restart openstack-nova-api.service openstack-nova-consoleauth openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service 
 sleep 5
+firewall-cmd --permanent --add-port=4789/udp
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --reload
 

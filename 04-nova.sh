@@ -91,10 +91,10 @@ _EOF_"
 ssh root@$IPMANAGEMENT << _EOFNEWTEST_
 chown root:nova /etc/nova/nova.conf.d/500-nova.conf
 ## hapus "#nama_proc" untuk mengaktifkan nested virtualization
-#intel modprobe kvm_intel nested=1
-#intel echo "options kvm_intel nested=1" > /etc/modprobe.d/kvm.conf
-#amd modprobe kvm_amd nested=1
-#amd echo "options kvm_amd nested=1" > /etc/modprobe.d/kvm.conf
+#intel modprobe -r kvm_intel && modprobe kvm_intel nested=1
+#intel echo "options kvm_intel nested=1" > /etc/modprobe.d/kvm_intel.conf
+#amd modprobe -r kvm_amd && modprobe kvm_amd nested=1
+#amd echo "options kvm_amd nested=1" > /etc/modprobe.d/kvm_amd.conf
 modprobe nbd
 echo nbd > /etc/modules-load.d/nbd.conf
 

@@ -102,10 +102,10 @@ password = $PLACEMENTPASS
 _EOF_"
 ssh root@$IPCOMPUTE << _EOFNEWTEST_
 ## hapus "#nama_proc" untuk mengaktifkan nested virtualization
-#intel modprobe kvm_intel nested=1
-#intel echo "options kvm_intel nested=1" > /etc/modprobe.d/kvm.conf
-#amd modprobe kvm_amd nested=1
-#amd echo "options kvm_amd nested=1" > /etc/modprobe.d/kvm.conf
+#intel modprobe -r kvm_intel && modprobe kvm_intel nested=1
+#intel echo "options kvm_intel nested=Y" > /etc/modprobe.d/kvm_intel.conf
+#amd modprobe -r kvm_amd && modprobe kvm_amd nested=1
+#amd echo "options kvm_amd nested=Y" > /etc/modprobe.d/kvm_amd.conf
 chown root:nova /etc/nova/nova.conf.d/500-nova.conf
 systemctl enable libvirtd.service openstack-nova-compute.service
 systemctl restart libvirtd.service openstack-nova-compute.service
@@ -226,6 +226,7 @@ systemctl restart openstack-nova-compute.service
 systemctl enable  openstack-neutron-openvswitch-agent.service 
 systemctl restart openstack-neutron-openvswitch-agent.service 
 sleep 5
+firewall-cmd --permanent --add-port=4789/udp
 firewall-cmd --permanent --add-port=9696/tcp
 firewall-cmd --permanent --add-port=5900-5999/tcp
 firewall-cmd --permanent --add-port 6080/tcp
