@@ -58,7 +58,7 @@ _EOF_
 
 source keystonerc_$NAMA_USER
 openstack keypair create demo-key > demo-key.pem
-chmod 600 demo.pem
+chmod 600 demo-key.pem
 openstack router create router-demo
 openstack network create private-net
 openstack subnet create --subnet-range 192.168.1.0/24 --dhcp --dns-nameserver 8.8.8.8 --network private-net private-sub
@@ -72,18 +72,20 @@ openstack security group rule create --protocol icmp default
 # openstack volume create --size 5 --snapshot vol-demo-snap vol-demo-snap-vol
 # openstack volume list
 # openstack snapshot list
-openstack server create --image cirros --flavor m1.tiny --key-name demo --network public-net --wait demo-pub-instance
-openstack server create --image cirros --flavor m1.tiny --key-name demo --network private-net --wait demo-priv-instance
+openstack server create --image cirros --flavor m1.tiny --key-name demo-key --network public-net --wait demo-pub-instance
+openstack server create --image cirros --flavor m1.tiny --key-name demo-key --network private-net --wait demo-priv-instance
+# openstack server delete demo-pub-instance
+# openstack server delete demo-priv-instance
 # openstack port create --fixed-ip ip-address=192.168.1.100 --network private-net port1
-# openstack server create --image cirros --flavor m1.tiny --key-name demo --port port1 --wait demo-priv-instance2
+# openstack server create --image cirros --flavor m1.tiny --key-name demo-key --port port1 --wait demo-priv-instance2
 # openstack server add volume demo-priv-instance2 vol-demo
 # openstack console log show demo-priv-instance2
 # openstack console url show demo-priv-instance2
 # openstack server list
 openstack floating ip create public-net
 ### MAnual
-#openstack server add floating ip demo-priv-instance #ip_dari_command_sebelumnya 
-#ssh -i demo.pem cirros@#ip_dari_command_sebelumnya
+#openstack server add floating ip demo-priv-instance #ip_floating 
+#ssh -i demo-key.pem cirros@#ip_floating
 # openstack container create files
 # mkdir folder
 # echo 'file yang diupload' > folder/upload
@@ -110,9 +112,10 @@ openstack floating ip create public-net
 # swift post files --read-acl ".r:*,.rlistings"
 # cat << _EOF_ > install_apache
 #!/bin/bash
+#apt update
 #apt -y install apache2
 #systemctl enable apache2 --now
 #cd /var/www/html
 #curl -O http://$IPOPENSTACK:8080/v1/AUTH_$PROJECT_ID/files/index.html
 #_EOF_
-# openstack server create --image ubuntu --flavor m1.small --key-name demo --network public-net --user-data install_apache --wait demo-web-instance
+# openstack server create --image ubuntu --flavor m1.small --key-name demo-key --network public-net --user-data install_apache --wait demo-web-instance
