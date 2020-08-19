@@ -182,8 +182,7 @@ echo 'NEUTRON_PLUGIN_CONF="/etc/neutron/plugins/ml2/ml2_conf.ini"' >> /etc/sysco
 ln -s /etc/apparmor.d/usr.sbin.dnsmasq /etc/apparmor.d/disable/
 # systemctl status apparmor
 systemctl restart openstack-nova-api.service 
-# Jika terdapat error database jalankan perintah ini.
-# su -s /bin/sh -c "neutron-db-manage upgrade head" neutron
+su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
 systemctl enable  openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 systemctl restart openstack-neutron.service openstack-neutron-openvswitch-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 sleep 5

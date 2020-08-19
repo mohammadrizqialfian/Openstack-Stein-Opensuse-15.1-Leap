@@ -39,7 +39,7 @@ openstack user create --domain default --password $PASS_USER $NAMA_USER
 # openstack role create compute-user
 # openstack role add --project $NAMA_PROJECT --user $NAMA_USER compute-user
 openstack role add --project $NAMA_PROJECT --user $NAMA_USER user
-openstack quota set --cores 2 --instances 4 --ram 4000 $NAMA_PROJECT
+openstack quota set --cores 2 --instances 4 --ram 4096 $NAMA_PROJECT
 openstack network create public-net --external --share --provider-network-type flat --provider-physical-network provider
 openstack subnet create --subnet-range $SUBNET_PUB --dhcp --gateway $GATEWAY_PUB --allocation-pool start=$START_PUB,end=$END_PUB --dns-nameserver 8.8.8.8 --network public-net public-sub
 
